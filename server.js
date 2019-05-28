@@ -19,7 +19,7 @@ process.argv.forEach(function(val, index, array){
     if(index === 2){ // Nombre de la tienda
         ip = val.split('#')[0];
         ipToConnect = val.split('#')[1];
-        ps = parseInt(val.split('#')[2]); 
+        ps = parseInt(val.split('#')[2], 10); 
     }
     else if(index === 3){
         store_name = val;
@@ -104,7 +104,7 @@ socketInput.sockets.on('connection', function(socket){
         }
 
         // Si la tienda donde se agrega el producto es igual a la data estoy en el nodo de la tienda
-        if(last_message.split('#')[0] === store_name){
+        if(data.split('#')[0] === store_name){
             console.log("Llego aqui");
             socketClient.emit('add_product', 'Su producto ha sido agregado a la tienda ' + store_name+ ' exitosamente.');
         }
