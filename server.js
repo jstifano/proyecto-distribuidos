@@ -18,7 +18,8 @@ var ipToConnect = "";
 process.argv.forEach(function(val, index, array){
     if(index === 2){ // Nombre de la tienda
         ip = val.split('#')[0];
-        ipToConnect = val.split('#')[1]; 
+        ipToConnect = val.split('#')[1];
+        ps = val.split('#')[2]; 
     }
     else if(index === 3){
         store_name = val;
@@ -42,7 +43,7 @@ try {
         })
     }
 } catch (error) { // Si el archivo no existe lo creo.
-    if(!config.last_port_initiated){
+/*     if(!config.last_port_initiated){
         ps = parseInt(config.port_initial,10) + 1; 
         pe = ps + 1; 
         pc = pe + 1; 
@@ -51,23 +52,29 @@ try {
         ps =  parseInt(config.last_port_initiated,10) + 1; 
         pe = ps + 1; 
         pc = pe + 1;
-    }
+    } */
+
+    pe = ps + 1;
+    pc = pe + 1;
+
     storeData = ip+'#'+store_name+'#'+ps+'#'+pe+'#'+pc;
     fs.writeFile('tienda'+store_name+'.txt', storeData, function(data){}); // Si no existe lo creo nuevo  
 
     // Si es el primer nodo que se levanta, registro cual es su entry point
-    if(config.number_nodes === 0){
+/*     if(config.number_nodes === 0){
         config.first_entry_point = pe;
     }
     config.number_nodes += 1;
 
     if((config.number_nodes > 2) && lastNode){ // Si es mayor a 2 nodos, debo cerrar el anillo con el primero
         ps = parseInt(config.first_entry_point, 10);
-    }  
+    }   */
 }
 
-((config.number_nodes > 2) && lastNode) ? app.set('port', config.last_port_initiated + 1) : app.set('port', ps);
-config.last_port_initiated = pc; // Actualizo el ultimo puerto de cliente creado por un nodo
+/* ((config.number_nodes > 2) && lastNode) ? app.set('port', config.last_port_initiated + 1) : app.set('port', ps);
+config.last_port_initiated = pc; // Actualizo el ultimo puerto de cliente creado por un nodo */
+
+app.set('port', ps);
 
 fs.writeFile('config.json', JSON.stringify(config), function (err) {
     if (err) {
@@ -106,10 +113,10 @@ socketInput.sockets.on('connection', function(socket){
             console.log("Se actualizo la lista ", productList);
             let socketOut = require('socket.io-client');// Abro el socket de salida del servidor
             if(config.number_nodes > 2 && lastNode){
-                socketOut = socketOut.connect('http://'+ipToConnect+':'+config.first_entry_point);
+                socketOut = socketOut.connect(ipToConnect+':'+config.first_entry_point);
             }
             else {
-                socketOut = socketOut.connect('http://'+ipToConnect+':'+(ps + 4));
+                socketOut = socketOut.connect(ipToConnect+':'+(ps + 4));
             }
             socketOut.emit('add_product', productList.toString());
         }
@@ -156,10 +163,10 @@ socketClient.on('connection', function(socket){
 
         let socketOut = require('socket.io-client');// Abro el socket de salida del servidor
         if(config.number_nodes > 2 && lastNode){
-            socketOut = socketOut.connect('http://'+ipToConnect+':'+config.first_entry_point);
+            socketOut = socketOut.connect(ipToConnect+':'+config.first_entry_point);
         }
         else {
-            socketOut = socketOut.connect('http://'+ipToConnect+':'+(ps + 4));
+            socketOut = socketOut.connect(ipToConnect+':'+(ps + 4));
         }
         socketOut.emit('add_product', productList.toString());
     })

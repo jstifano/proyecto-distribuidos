@@ -22,7 +22,7 @@ process.argv.forEach(function (val, index, array) {
     }
 });
 
-var io = require('socket.io-client').connect('http://'+ip+':'+port);
+var io = require('socket.io-client').connect(ip+':'+port);
 var fs = require('fs');
 
 app.set('port', port);
