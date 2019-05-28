@@ -89,8 +89,6 @@ var socketClient = require('socket.io').listen(pc); // Abro el socket del client
 //************************* SOCKET PARA ENTRADA DEL SERVIDOR *********************************//
 socketInput.sockets.on('connection', function(socket){
     socket.on('add_product', function(data){
-        console.log("Dataaaa", data);
-
         let last_message = null;
         let length = null
         
@@ -102,7 +100,8 @@ socketInput.sockets.on('connection', function(socket){
         else {
             last_message = data;
         }
-
+        console.log("Store name", store);
+        console.log("data", data);
         // Si la tienda donde se agrega el producto es igual a la data estoy en el nodo de la tienda
         if(data.split('#')[0] === store_name){
             console.log("Llego aqui");
@@ -112,7 +111,7 @@ socketInput.sockets.on('connection', function(socket){
             productList = data.split();
             console.log("Se actualizo la lista ", productList);
             let socketOut = require('socket.io-client');// Abro el socket de salida del servidor
-            if(last_message.split('#')[0] === store_name){
+            if(data.split('#')[0] === store_name){
                 socketOut = socketOut.connect('http://'+ipToConnect+':'+pc-7);
             }
             else {
