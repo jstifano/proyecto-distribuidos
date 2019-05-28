@@ -111,7 +111,7 @@ socketInput.sockets.on('connection', function(socket){
             productList = data.split();
             console.log("Se actualizo la lista ", productList);
             let socketOut = require('socket.io-client');// Abro el socket de salida del servidor
-            if(data.split('#')[0] === 3){
+            if(store_name === '3'){
                 socketOut = socketOut.connect('http://'+ipToConnect+':'+pc-7);
             }
             else {
