@@ -113,10 +113,10 @@ socketInput.sockets.on('connection', function(socket){
             console.log("Se actualizo la lista ", productList);
             let socketOut = require('socket.io-client');// Abro el socket de salida del servidor
             if(last_message.split('#')[0] === store_name){
-                socketOut = socketOut.connect(ipToConnect+':'+pc-7);
+                socketOut = socketOut.connect('http://'+ipToConnect+':'+pc-7);
             }
             else {
-                socketOut = socketOut.connect(ipToConnect+':'+(ps + 4));
+                socketOut = socketOut.connect('http://'+ipToConnect+':'+(ps + 4));
             }
             socketOut.emit('add_product', productList.toString());
         }
@@ -162,7 +162,7 @@ socketClient.on('connection', function(socket){
         new_list = [];
 
         let socketOut = require('socket.io-client');// Abro el socket de salida del servidor
-        socketOut = socketOut.connect(ipToConnect+':'+(ps + 4));
+        socketOut = socketOut.connect('http://'+ipToConnect+':'+(ps + 4));
         socketOut.emit('add_product', productList.toString());
     })
     
