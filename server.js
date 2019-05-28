@@ -100,7 +100,7 @@ socketInput.sockets.on('connection', function(socket){
         else {
             last_message = data;
         }
-        console.log("Store name", store);
+        console.log("Store name", store_name);
         console.log("data", data);
         // Si la tienda donde se agrega el producto es igual a la data estoy en el nodo de la tienda
         if(data.split('#')[0] === store_name){
