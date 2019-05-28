@@ -94,9 +94,9 @@ socketInput.sockets.on('connection', function(socket){
         else {
             last_message = data;
         }
-        console.log("Store name", store_name);
+
         // Si la tienda donde se agrega el producto es igual a la data estoy en el nodo de la tienda
-        if(data.split('#')[0] === store_name){
+        if(last_message.split('#')[0] === store_name){
             console.log("Llego aqui");
             socketClient.emit('add_product', 'Su producto ha sido agregado a la tienda ' + store_name+ ' exitosamente.');
         }
@@ -105,8 +105,6 @@ socketInput.sockets.on('connection', function(socket){
             console.log("Se actualizo la lista ", productList);
             let socketOut = require('socket.io-client');// Abro el socket de salida del servidor
             if(store_name === '3'){
-                console.log("ES LA TIENDA 3 entrooo");
-                console.log("ipConnect", ipToConnect);
                 socketOut = socketOut.connect('http://'+ipToConnect+':'+(pc - 7));
             }
             else {
