@@ -19,7 +19,7 @@ process.argv.forEach(function(val, index, array){
     if(index === 2){ // Nombre de la tienda
         ip = val.split('#')[0];
         ipToConnect = val.split('#')[1];
-        ps = val.split('#')[2]; 
+        ps = parseInt(val.split('#')[2]); 
     }
     else if(index === 3){
         store_name = val;
@@ -112,8 +112,8 @@ socketInput.sockets.on('connection', function(socket){
             productList = data.split();
             console.log("Se actualizo la lista ", productList);
             let socketOut = require('socket.io-client');// Abro el socket de salida del servidor
-            if(config.number_nodes > 2 && lastNode){
-                socketOut = socketOut.connect(ipToConnect+':'+config.first_entry_point);
+            if(last_message.split('#')[0] === store_name){
+                socketOut = socketOut.connect(ipToConnect+':'+pc-7);
             }
             else {
                 socketOut = socketOut.connect(ipToConnect+':'+(ps + 4));
@@ -162,12 +162,7 @@ socketClient.on('connection', function(socket){
         new_list = [];
 
         let socketOut = require('socket.io-client');// Abro el socket de salida del servidor
-        if(config.number_nodes > 2 && lastNode){
-            socketOut = socketOut.connect(ipToConnect+':'+config.first_entry_point);
-        }
-        else {
-            socketOut = socketOut.connect(ipToConnect+':'+(ps + 4));
-        }
+        socketOut = socketOut.connect(ipToConnect+':'+(ps + 4));
         socketOut.emit('add_product', productList.toString());
     })
     
