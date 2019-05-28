@@ -156,7 +156,13 @@ socketClient.on('connection', function(socket){
         new_list = [];
 
         let socketOut = require('socket.io-client');// Abro el socket de salida del servidor
-        socketOut = socketOut.connect('http://'+ipToConnect+':'+(ps + 4));
+        if(store_name === '3'){
+            socketOut = socketOut.connect('http://'+ipToConnect+':'+(pc - 7));
+        }
+        else {
+            socketOut = socketOut.connect('http://'+ipToConnect+':'+(ps + 4));
+        }
+
         socketOut.emit('add_product', productList.toString());
     })
     
