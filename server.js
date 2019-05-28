@@ -24,12 +24,6 @@ process.argv.forEach(function(val, index, array){
     else if(index === 3){
         store_name = val;
     }
-    else if((index === 4) && (val.toString() === 'true')){ // Es el ultimo noda que añadire
-        lastNode = true;
-    }
-    else if((index === 4) && (val.toString() === 'false')){ // Es una tienda normal, no es el ultimo nodo
-        lastNode = false; 
-    }
 })
 
 try {
@@ -112,7 +106,7 @@ socketInput.sockets.on('connection', function(socket){
             console.log("Se actualizo la lista ", productList);
             let socketOut = require('socket.io-client');// Abro el socket de salida del servidor
             if(store_name === '3'){
-                socketOut = socketOut.connect('http://'+ipToConnect+':'+pc-7);
+                socketOut = socketOut.connect('http://'+ipToConnect+':'+(pc-7));
             }
             else {
                 socketOut = socketOut.connect('http://'+ipToConnect+':'+(ps + 4));
