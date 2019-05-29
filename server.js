@@ -179,6 +179,30 @@ socketClient.on('connection', function(socket){
         inventory = inventory.sort(); // Ordeno el arreglo
         socketClient.emit('list_product_store', inventory.toString());
     })
+
+    socket.on('total_product_store', function(data){
+        let total_inventory = [];
+        productList.forEach((product, index) =>{
+            if(index === 0){
+                total_inventory.push(product);
+            }
+            else {
+                let aux = [];
+                total_inventory.forEach(inven =>{
+                    if(inven.split('#')[1] === product.split('#')[1]){
+                        let sum = parseInt(inven.split('#')[2], 10) + parseInt(product.split('#')[2], 10);
+                        inven = inven.split('#')[0] + inven.split('#')[1] + sum.toString();
+                        aux.push(inven); 
+                    }
+                    else {
+                        aux.push(inven);
+                    }
+                })
+                total_inventory = aux;
+            }
+        })
+        socketClient.emit('list_product_store', total_inventory.toString());
+    })
 })
 //************************* SOCKET DE SALIDA PARA EL CLIENTE *********************************//
 
