@@ -137,7 +137,7 @@ socketClient.on('connection', function(socket){
                     console.log("Se sumaron " + data.split('#')[3]+ " productos del codigo " + data.split('#')[2] + " en inventario en la " + store_name);
                 }
                 else {
-                    new_list.push(message);
+                    new_list.push(p);
                 }
             })
 
