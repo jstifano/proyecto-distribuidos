@@ -135,7 +135,6 @@ socketClient.on('connection', function(socket){
                     p = message;
                     console.log("Se sumaron " + data.split('#')[3]+ " productos del codigo " + data.split('#')[2] + " en inventario en la " + store_name);
                 }
-                new_list.push(p);
             })
 
             if(!isFound){ // El producto que se está añadiendo, no está en la lista de inventario de la tienda
@@ -143,17 +142,14 @@ socketClient.on('connection', function(socket){
                 productList.push(message);
             }
             else { // Actualizo el inventario de la tienda
-                productList = '['+new_list.join(',')+']';
-                console.log("new_list", new_list);
                 console.log("Se actualizo el inventario del producto con el codigo " + data.split('#')[2]);
+                console.log("Product list >>> ", productList);
             }
         }
         else { // Es el primer producto que se agrega a inventario
             productList.push(message);
             console.log("Se agrego un producto");
         }
-
-        new_list = [];
 
         let socketOut = require('socket.io-client');// Abro el socket de salida del servidor
         if(store_name === '3'){
