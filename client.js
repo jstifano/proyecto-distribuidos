@@ -56,6 +56,7 @@ io.on('total_product_store', function(data){
 
 // Respuesta del servidor al emitir la respuesta de listar los productos en total
 io.on('list_product_store', function(data){
+    console.log("Dataaaa list", data);
     let arrayOfProducts = data.split(',');
     let elements = [];
     let code = "";
