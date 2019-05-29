@@ -56,25 +56,33 @@ io.on('total_product_store', function(data){
 
 // Respuesta del servidor al emitir la respuesta de listar los productos en total
 io.on('list_product_store', function(data){
-    console.log("Dataaaa list", data);
-    let arrayOfProducts = data.split(',');
-    let elements = [];
-    let code = "";
-    let quantity = "";
+    
+    if(!data){
+        rows = [['No hay productos', 0]];
+        pt.create(headers, rows);
+        pt.print(); // Pinto la tabla vacia ya que no hay productos en la tienda
+    }
+    else {
+        let arrayOfProducts = data.split(',');
+        let elements = [];
+        let code = "";
+        let quantity = "";
 
-    arrayOfProducts.forEach(product =>  {
-        code = product.split('#')[1];
-        quantity = product.split('#')[2];
-        elements.push(code);
-        elements.push(quantity);
-        rows.push(elements);
-        code = "";
-        quantity = "";
-        elements = [];
-    })
+        arrayOfProducts.forEach(product =>  {
+            code = product.split('#')[1];
+            quantity = product.split('#')[2];
+            elements.push(code);
+            elements.push(quantity);
+            rows.push(elements);
+            code = "";
+            quantity = "";
+            elements = [];
+        })
 
-    pt.create(headers, rows);
-    pt.print(); // Pinto la tabla con el resultado del inventario de la tienda
+        pt.create(headers, rows);
+        pt.print(); // Pinto la tabla con el resultado del inventario de la tienda
+    }
+    
 
     io.disconnect();
 })
