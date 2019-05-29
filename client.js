@@ -7,7 +7,8 @@ var store_name = ""; // Nombre de la tienda asociado al server
 var message = "";
 var PrettyTable = require('prettytable');
 var pt = new PrettyTable();
-var headers = ['Tienda', 'Productos', 'Cantidad'];
+var headers = ['Productos', 'Cantidad'];
+var rows = [];
 
 // Funcion para recibir los argumentos enviados al levantar un node de servidor
 process.argv.forEach(function (val, index, array) {
@@ -55,6 +56,24 @@ io.on('total_product_store', function(data){
 
 // Respuesta del servidor al emitir la respuesta de listar los productos en total
 io.on('list_product_store', function(data){
-    console.log("Response server ::: ", data);
+    let arrayOfProducts = data.split(',');
+    let elements = [];
+    let code = "";
+    let quantity = "";
+
+    arrayOfProducts.forEach(product =>  {
+        code = product.split('#')[1];
+        quantity = product.split('#')[2];
+        elements.push(code);
+        elements.push(quantity);
+        rows.push(elements);
+        code = "";
+        quantity = "";
+        elements = [];
+    })
+
+    pt.create(headers, rows);
+    pt.print(); // Pinto la tabla con el resultado del inventario de la tienda
+
     io.disconnect();
 })

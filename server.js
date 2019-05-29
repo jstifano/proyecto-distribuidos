@@ -128,7 +128,6 @@ socketClient.on('connection', function(socket){
             let isFound = false;
 
             productList.forEach(p => {
-                console.log("PRODUCT", p);
                 if((p.split('#')[1] === data.split('#')[2]) && (data.split('#')[1] === p.split('#')[0]) ){
                     isFound = true;
                     let sum = parseInt(p.split('#')[2], 10) + parseInt(message.split('#')[2], 10)
@@ -146,7 +145,6 @@ socketClient.on('connection', function(socket){
                 productList = new_list;
                 new_list = [];
                 console.log("Se actualizo el inventario del producto con el codigo " + data.split('#')[2]);
-                console.log("Product list >>> ", productList);
             }
         }
         else { // Es el primer producto que se agrega a inventario
