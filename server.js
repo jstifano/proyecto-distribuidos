@@ -101,7 +101,7 @@ socketInput.sockets.on('connection', function(socket){
             socketClient.emit('add_product', 'Su producto ha sido agregado a la tienda ' + store_name+ ' exitosamente.');
         }
         else { // Sino emito la data a los demas nodos.
-            productList = data.split();
+            productList = data.split(',');
             console.log("Se actualizo la lista ", productList);
             let socketOut = require('socket.io-client');// Abro el socket de salida del servidor
             if(store_name === '3'){
@@ -121,20 +121,21 @@ socketClient.on('connection', function(socket){
     // Añadir un nuevo producto de una tienda
     socket.on('add_product', function(data){
         let message = data.split('#')[1] + '#' + data.split('#')[2] + '#' + data.split('#')[3];
+
         // Ya tiene mas de un producto en inventario la tienda
         if(productList.length !== 0){
             let new_list = [];
             let isFound = false;
 
-            productList[0].split(',').forEach(p => {
+            productList.forEach(p => {
                 console.log("PRODUCT", p);
                 if((p.split('#')[1] === data.split('#')[2]) && (data.split('#')[1] === p.split('#')[0]) ){
                     isFound = true;
-                    let sum = parseInt(p.split('#')[2], 10) + parseInt(data.split('#')[3], 10)
+                    let sum = parseInt(p.split('#')[2], 10) + parseInt(message.split('#')[2], 10)
                     message = data.split('#')[1] + '#' + data.split('#')[2] + '#' + sum.toString();
-                    p = message;
                     console.log("Se sumaron " + data.split('#')[3]+ " productos del codigo " + data.split('#')[2] + " en inventario en la " + store_name);
                 }
+                new_list.push(message);
             })
 
             if(!isFound){ // El producto que se está añadiendo, no está en la lista de inventario de la tienda
@@ -142,6 +143,7 @@ socketClient.on('connection', function(socket){
                 productList.push(message);
             }
             else { // Actualizo el inventario de la tienda
+                productList = new_list.split(',');
                 console.log("Se actualizo el inventario del producto con el codigo " + data.split('#')[2]);
                 console.log("Product list >>> ", productList);
             }
