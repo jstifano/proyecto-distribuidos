@@ -127,7 +127,7 @@ socketClient.on('connection', function(socket){
             let isFound = false;
 
             productList.forEach(p => {
-                if(p.split('#')[1] === data.split('#')[2] && data.split('#')[1] === store_name){
+                if((p.split('#')[1] === data.split('#')[2]) && (data.split('#')[1] === p.split('#')[0]) ){
                     isFound = true;
                     let sum = parseInt(p.split('#')[2], 10) + parseInt(data.split('#')[3], 10)
                     message = data.split('#')[1] + '#' + data.split('#')[2] + '#' + sum.toString();
