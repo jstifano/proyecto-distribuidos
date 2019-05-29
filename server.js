@@ -130,11 +130,15 @@ socketClient.on('connection', function(socket){
             productList.forEach(p => {
                 if((p.split('#')[1] === data.split('#')[2]) && (data.split('#')[1] === p.split('#')[0]) ){
                     isFound = true;
-                    let sum = parseInt(p.split('#')[2], 10) + parseInt(message.split('#')[2], 10)
+                    let sum = parseInt(p.split('#')[2], 10) + parseInt(message.split('#')[2], 10);
                     message = data.split('#')[1] + '#' + data.split('#')[2] + '#' + sum.toString();
+                    p = message;
+                    new_list.push(p);
                     console.log("Se sumaron " + data.split('#')[3]+ " productos del codigo " + data.split('#')[2] + " en inventario en la " + store_name);
                 }
-                new_list.push(message);
+                else {
+                    new_list.push(message);
+                }
             })
 
             if(!isFound){ // El producto que se está añadiendo, no está en la lista de inventario de la tienda
