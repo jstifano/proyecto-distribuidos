@@ -37,7 +37,7 @@ io.on('connect', function(socket){
     else if(message.split('#')[0] === 'listarproductos'){
         io.emit('list_product_store', message);
     }
-    else if(message.split('#')[0] === 'totalproductos'){
+    else if(message === 'totalproductos'){
         io.emit('total_product_store', message);
     }
 });
@@ -48,7 +48,7 @@ io.on('add_product', function(data){
     io.disconnect();
 })
 
-// Respuesta del servidor al emitir la respuesta de listar los productos de la tienda
+// Respuesta del servidor al emitir la respuesta de listar todos los productos de la empresa
 io.on('total_product_store', function(data){
     createTable(data);
     io.disconnect();
