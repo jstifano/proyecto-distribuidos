@@ -201,6 +201,7 @@ socketClient.on('connection', function(socket){
                 total_inventory = aux;
             }
         })
+        console.log("Total inventory >>>", total_inventory);
         socketClient.emit('total_product_store', total_inventory.toString());
     })
 })
