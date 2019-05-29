@@ -201,7 +201,7 @@ socketClient.on('connection', function(socket){
                 total_inventory = aux;
             }
         })
-        socketClient.emit('list_product_store', total_inventory.toString());
+        socketClient.emit('total_product_store', total_inventory.toString());
     })
 })
 //************************* SOCKET DE SALIDA PARA EL CLIENTE *********************************//
