@@ -143,8 +143,8 @@ socketClient.on('connection', function(socket){
                 productList.push(message);
             }
             else { // Actualizo el inventario de la tienda
+                productList = '['+new_list.join(',')+']';
                 console.log("new_list", new_list);
-                productList = new_list.join(',');
                 console.log("Se actualizo el inventario del producto con el codigo " + data.split('#')[2]);
             }
         }
