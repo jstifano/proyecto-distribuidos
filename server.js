@@ -14,7 +14,6 @@ var lastNode = false;
 var ip = "";
 var ipToConnect = "";
 var total_inventory = [];
-var stores = [];
 // ******* VARIABLES GLOBALES DEL SERVIDOR ********* //
 
 process.argv.forEach(function(val, index, array){
@@ -206,23 +205,6 @@ socketClient.on('connection', function(socket){
             serializedString = serializedString+clave+'#'+valor+','
         }
         socketClient.emit('total_product_store', serializedString.substr(0, serializedString.length - 1));
-    })
-
-    socket.on('add_store', function(data){
-        if(stores.length === 0){
-            stores.push(data.split('#')[1]);
-            socketClient.emit('add_store', 'Se agrego su tienda exitosamente');
-        }
-        else {
-            if(stores.toString().indexOf(data) !== -1){
-                socketClient.emit('add_store', 'Ya existe el nombre de tienda introducido.');
-            }
-            else {
-                stores.push(data.split('#')[1]);
-                socketOut.emit('add_store', stores.toString());
-                socketClient.emit('add_store', 'Se agrego su tienda exitosamente');
-            }
-        }
     })
 })
 //************************* SOCKET DE SALIDA PARA EL CLIENTE *********************************//
