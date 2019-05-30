@@ -50,6 +50,7 @@ io.on('add_product', function(data){
 
 // Respuesta del servidor al emitir la respuesta de listar todos los productos de la empresa
 io.on('total_product_store', function(data){
+    console.log("Dataaa", data);
     createTable(data);
     io.disconnect();
 })

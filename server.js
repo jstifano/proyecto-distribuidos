@@ -13,6 +13,7 @@ var productList = [];
 var lastNode = false;
 var ip = "";
 var ipToConnect = "";
+var total_inventory = [];
 // ******* VARIABLES GLOBALES DEL SERVIDOR ********* //
 
 process.argv.forEach(function(val, index, array){
@@ -181,28 +182,23 @@ socketClient.on('connection', function(socket){
     })
 
     socket.on('total_product_store', function(data){
-        let total_inventory = [];
-        productList.forEach((product, index) =>{
-            if(index === 0){
-                total_inventory.push(product);
+        var new_map = new Map();
+        productList.forEach(product => {
+            let split = product.split('#');
+            if(!new_map.get(split[1])){
+                new_map.set(split[1],split[2]);
+            }else{
+                let cantidad = new_map.get(split[1]);
+                let updatedCantidad = parseInt(cantidad,10)+parseInt(split[2]);
+                new_map.set(split[1],updatedCantidad.toString());
             }
-            else {
-                total_inventory.forEach(inven =>{
-                    if(inven.split('#')[1] === product.split('#')[1]){
-                        let update = "";
-                        let sum = parseInt(inven.split('#')[2], 10) + parseInt(product.split('#')[2], 10);
-                        update = inven.split('#')[0]+'#'+inven.split('#')[1]+'#'+ sum.toString();
-                        inven = update;
-                        total_inventory.push(inven); 
-                    }
-                    else {
-                        total_inventory.push(inven);
-                    }
-                })
-                total_inventory = aux;
-            }
-        })
-        socketClient.emit('total_product_store', total_inventory.toString());
+        });
+        let serializedString = ""; 
+        for (var [clave, valor] of new_map.entries()) {
+            serializedString = serializedString+clave+'#'+valor+','
+        }
+        console.log(serializedString);
+        socketClient.emit('total_product_store', serializedString);
     })
 })
 //************************* SOCKET DE SALIDA PARA EL CLIENTE *********************************//
