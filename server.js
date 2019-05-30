@@ -187,17 +187,16 @@ socketClient.on('connection', function(socket){
                 total_inventory.push(product);
             }
             else {
-                let aux = [];
                 total_inventory.forEach(inven =>{
                     if(inven.split('#')[1] === product.split('#')[1]){
                         let update = "";
                         let sum = parseInt(inven.split('#')[2], 10) + parseInt(product.split('#')[2], 10);
                         update = inven.split('#')[0]+'#'+inven.split('#')[1]+'#'+ sum.toString();
                         inven = update;
-                        aux.push(inven); 
+                        total_inventory.push(inven); 
                     }
                     else {
-                        aux.push(inven);
+                        total_inventory.push(inven);
                     }
                 })
                 total_inventory = aux;
