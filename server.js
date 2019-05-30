@@ -3,7 +3,6 @@ var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
 var fs = require('fs');
-var config = require('./config.json');
 var ps = null; // Puerto de salida
 var pe = null; // Puerto de entrada
 var pc = null; // Puerto del cliente
@@ -71,12 +70,12 @@ config.last_port_initiated = pc; // Actualizo el ultimo puerto de cliente creado
 
 app.set('port', ps);
 
-fs.writeFile('config.json', JSON.stringify(config), function (err) {
+/* fs.writeFile('config.json', JSON.stringify(config), function (err) {
     if (err) {
         console.log("Ocurrio un error actualizando el archivo config");
     }
     console.log("El puerto para el cliente en esta tienda es: ", pc);
-})
+}) */
 
 var socketInput = require('socket.io').listen(pe); // Abro el socket de salida del servidor
 var socketClient = require('socket.io').listen(pc); // Abro el socket del cliente del servidor
@@ -212,4 +211,5 @@ socketClient.on('connection', function(socket){
 // Levanto el servidor con Express
 server.listen(app.get('port'), function () {
     console.log("Server is running on port:", app.get('port'));
+    console.log("El puerto para el cliente en esta tienda es: ", pc);
 });
