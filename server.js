@@ -198,7 +198,7 @@ socketClient.on('connection', function(socket){
             serializedString = serializedString+clave+'#'+valor+','
         }
         console.log(serializedString);
-        socketClient.emit('total_product_store', serializedString);
+        socketClient.emit('total_product_store', serializedString.substr(0, serializedString.length - 1));
     })
 })
 //************************* SOCKET DE SALIDA PARA EL CLIENTE *********************************//
