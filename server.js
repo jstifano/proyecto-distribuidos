@@ -197,7 +197,6 @@ socketClient.on('connection', function(socket){
         for (var [clave, valor] of new_map.entries()) {
             serializedString = serializedString+clave+'#'+valor+','
         }
-        console.log("substring", serializedString.substr(0, serializedString.length - 1) );
         socketClient.emit('total_product_store', serializedString.substr(0, serializedString.length - 1));
     })
 })

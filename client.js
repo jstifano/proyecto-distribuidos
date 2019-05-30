@@ -56,6 +56,7 @@ io.on('total_product_store', function(data){
 
 // Respuesta del servidor al emitir la respuesta de listar los productos en total
 io.on('list_product_store', function(data){
+    console.log('listar', data);
     createTable(data, 'listar');
     io.disconnect();
 })
@@ -70,29 +71,42 @@ function createTable(data, type){
             rows = [];
         }
         else {
-            let arrayOfProducts = data.split(',');
-
-            arrayOfProducts.forEach(product =>  {
-                let code = product.split('#')[0];
-                let quantity = product.split('#')[1];
+            if(data.split(',').length === 1){
+                let code = data.split('#')[1];
+                let quantity = data.split('#')[2];
                 let elements = [];
                 elements.push(code);
                 elements.push(quantity);
                 rows.push(elements);
-                code = "";
-                quantity = "";
-                elements = [];
-            })
-
-            pt.create(headers, rows);
-            pt.print(); // Pinto la tabla con el resultado del inventario de la tienda  
+    
+                pt.create(headers, rows);
+                pt.print(); // Pinto la tabla con el resultado del inventario de la tienda
+            }
+            else {
+                let arrayOfProducts = data.split(',');
+    
+                arrayOfProducts.forEach(product =>  {
+                    let code = product.split('#')[1];
+                    let quantity = product.split('#')[2];
+                    let elements = [];
+                    elements.push(code);
+                    elements.push(quantity);
+                    rows.push(elements);
+                    code = "";
+                    quantity = "";
+                    elements = [];
+                })
+    
+                pt.create(headers, rows);
+                pt.print(); // Pinto la tabla con el resultado del inventario de la tienda
+            } 
         }  
     }
     else {
         if(data.split(',').length === 1){
             let code = data.split('#')[0];
             let quantity = data.split('#')[1];
-            
+            let elements = [];
             elements.push(code);
             elements.push(quantity);
             rows.push(elements);
