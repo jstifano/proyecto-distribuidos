@@ -70,24 +70,35 @@ function createTable(data){
         rows = [];
     }
     else {
-        let arrayOfProducts = data.split(',');
-        let elements = [];
-        let code = "";
-        let quantity = "";
-
-        arrayOfProducts.forEach(product =>  {
-            code = product.split('#')[1];
-            quantity = product.split('#')[2];
+        if(data.split(',').length === 1){
+            let code = data.split('#')[0];
+            let quantity = data.split('#')[1];
+            
             elements.push(code);
             elements.push(quantity);
             rows.push(elements);
-            code = "";
-            quantity = "";
-            elements = [];
-        })
 
-        pt.create(headers, rows);
-        pt.print(); // Pinto la tabla con el resultado del inventario de la tienda
+            pt.create(headers, rows);
+            pt.print(); // Pinto la tabla con el resultado del inventario de la tienda
+        }
+        else {
+            let arrayOfProducts = data.split(',');
+
+            arrayOfProducts.forEach(product =>  {
+                let code = product.split('#')[0];
+                let quantity = product.split('#')[1];
+                let elements = [];
+                elements.push(code);
+                elements.push(quantity);
+                rows.push(elements);
+                code = "";
+                quantity = "";
+                elements = [];
+            })
+
+            pt.create(headers, rows);
+            pt.print(); // Pinto la tabla con el resultado del inventario de la tienda
+        }
     }
     return;
 }
