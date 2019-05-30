@@ -40,6 +40,9 @@ io.on('connect', function(socket){
     else if(message === 'totalproductos'){
         io.emit('total_product_store', message);
     }
+    else if(message === 'totaltienda'){
+        io.emit('totaltienda', message);
+    }
 });
 
 // Respuesta del servidor al emitir la respuesta de añadir un producto a la tienda
@@ -57,6 +60,11 @@ io.on('total_product_store', function(data){
 // Respuesta del servidor al emitir la respuesta de listar los productos en total
 io.on('list_product_store', function(data){
     createTable(data, 'listar');
+    io.disconnect();
+})
+
+io.on('totaltienda', function(data){
+    createTable(data, 'totaltienda');
     io.disconnect();
 })
 
@@ -100,7 +108,7 @@ function createTable(data, type){
             } 
         }  
     }
-    else {
+    else if(message === 'total'){
         if(data.split(',').length === 1){
             let code = data.split('#')[0];
             let quantity = data.split('#')[1];
@@ -130,6 +138,9 @@ function createTable(data, type){
             pt.create(headers, rows);
             pt.print(); // Pinto la tabla con el resultado del inventario de la tienda
         }
+    }
+    else {
+        console.log(data);
     }
     return;
 }

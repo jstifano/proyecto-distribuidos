@@ -205,6 +205,10 @@ socketClient.on('connection', function(socket){
         }
         socketClient.emit('total_product_store', serializedString.substr(0, serializedString.length - 1));
     })
+
+    socket.on('totaltienda', function(data){
+        socketClient.emit('totaltienda', productList.toString());
+    })
 })
 //************************* SOCKET DE SALIDA PARA EL CLIENTE *********************************//
 
