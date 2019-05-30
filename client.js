@@ -40,6 +40,9 @@ io.on('connect', function(socket){
     else if(message === 'totalproductos'){
         io.emit('total_product_store', message);
     }
+    else {
+        io.emit('add_store', message);
+    }
 });
 
 // Respuesta del servidor al emitir la respuesta de añadir un producto a la tienda
@@ -56,11 +59,13 @@ io.on('total_product_store', function(data){
 
 // Respuesta del servidor al emitir la respuesta de listar los productos en total
 io.on('list_product_store', function(data){
-    console.log('listar', data);
     createTable(data, 'listar');
     io.disconnect();
 })
 
+io.on('add_store', function(data){
+    console.log("Response server ::: ", data);
+})
 
 function createTable(data, type){
     if(type === 'listar'){
