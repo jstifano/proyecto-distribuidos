@@ -19,7 +19,7 @@ process.argv.forEach(function(val, index, array){
     if(index === 2){
         ip = val.split('#')[0]; // Ip la cual se va levantar el nodo 
         ipToConnect = val.split('#')[1]; // Ip a la cual se conectará el siguiente nodo
-        ps = parseInt(val.split('#')[2], 10); // Puerto del cliente
+        ps = parseInt(val.split('#')[2], 10); // Puerto de salida del nodo
     }
     else if(index === 3){ // Nombre de la tienda
         store_name = val;
@@ -28,9 +28,10 @@ process.argv.forEach(function(val, index, array){
 
 // Proceso de recuperación del nodo en caso de una falla
 try {
-    if(fs.existsSync('recover_'+val+'.txt')){
+    if(fs.exists('recover_'+store_name+'.txt')){
         // El archivo existe, agarro los datos del archivo y recupero los puertos en el cual estaba levantado
-        fs.readFile(store_name+'.txt', 'utf8', function(err, content){
+        fs.readFile('recover_'+store_name+'.txt', 'utf8', function(err, content){
+            console.log("contenttt", content);
             store_name = content.split('#')[1];
             ps = parseInt(content.split('#')[2], 10);
             pe = parseInt(content.split('#')[3], 10);
