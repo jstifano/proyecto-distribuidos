@@ -41,7 +41,7 @@ io.on('connect', function(socket){
         io.emit('total_product_store', message);
     }
     else if(message === 'totaltienda'){
-        io.emit('totaltienda', message);
+        io.emit('total_store', message);
     }
 });
 
@@ -57,18 +57,19 @@ io.on('total_product_store', function(data){
     io.disconnect();
 })
 
-// Respuesta del servidor al emitir la respuesta de listar los productos en total
+// Respuesta del servidor al emitir la respuesta de listar los productos en total de la tienda
 io.on('list_product_store', function(data){
     createTable(data, 'listar');
     io.disconnect();
 })
 
-io.on('totaltienda', function(data){
+io.on('total_store', function(data){
     createTable(data, 'totaltienda');
     io.disconnect();
 })
 
 function createTable(data, type){
+    // Deseo listar los productos totales de la tienda
     if(type === 'listar'){
         if(!data){
             rows = [['No hay productos', 0]];
@@ -118,7 +119,7 @@ function createTable(data, type){
             rows.push(elements);
 
             pt.create(headers, rows);
-            pt.print(); // Pinto la tabla con el resultado del inventario de la tienda
+            pt.print(); // Pinto la tabla con el resultado del inventario de la empresa
         }
         else {
             let arrayOfProducts = data.split(',');
@@ -136,11 +137,11 @@ function createTable(data, type){
             })
 
             pt.create(headers, rows);
-            pt.print(); // Pinto la tabla con el resultado del inventario de la tienda
+            pt.print(); // Pinto la tabla con el resultado del inventario de la empresa
         }
     }
     else {
-        console.log(data);
+        console.log("Dataaa", data);
     }
     return;
 }

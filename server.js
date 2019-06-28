@@ -8,65 +8,49 @@ var pe = null; // Puerto de entrada
 var pc = null; // Puerto del cliente
 var store_name = "";
 var storeData = "";
-var productList = [];
+var productList = []; //Lista de productos en inventario
 var lastNode = false;
 var ip = "";
 var ipToConnect = "";
-var total_inventory = [];
 // ******* VARIABLES GLOBALES DEL SERVIDOR ********* //
 
+// Parametros a recibir mediante la consola
 process.argv.forEach(function(val, index, array){
-    if(index === 2){ // Nombre de la tienda
-        ip = val.split('#')[0];
-        ipToConnect = val.split('#')[1];
-        ps = parseInt(val.split('#')[2], 10); 
+    if(index === 2){
+        ip = val.split('#')[0]; // Ip la cual se va levantar el nodo 
+        ipToConnect = val.split('#')[1]; // Ip a la cual se conectará el siguiente nodo
+        ps = parseInt(val.split('#')[2], 10); // Puerto del cliente
     }
-    else if(index === 3){
+    else if(index === 3){ // Nombre de la tienda
         store_name = val;
     }
 })
 
+// Proceso de recuperación del nodo en caso de una falla
 try {
-    if(fs.existsSync('tienda'+val+'.txt')){
-        // El archivo existe, agarro los datos del archivo
+    if(fs.existsSync('recover_'+val+'.txt')){
+        // El archivo existe, agarro los datos del archivo y recupero los puertos en el cual estaba levantado
         fs.readFile(store_name+'.txt', 'utf8', function(err, content){
-            store_name = content.split('#')[0];
-            ps = parseInt(content.split('#')[1], 10);
-            pe = parseInt(content.split('#')[2], 10);
-            pc = parseInt(content.split('#')[3], 10);
+            store_name = content.split('#')[1];
+            ps = parseInt(content.split('#')[2], 10);
+            pe = parseInt(content.split('#')[3], 10);
+            pc = parseInt(content.split('#')[4], 10);
         })
     }
-} catch (error) { // Si el archivo no existe lo creo.
-/*     if(!config.last_port_initiated){
-        ps = parseInt(config.port_initial,10) + 1; 
-        pe = ps + 1; 
-        pc = pe + 1; 
-    }
     else {
-        ps =  parseInt(config.last_port_initiated,10) + 1; 
         pe = ps + 1; 
         pc = pe + 1;
-    } */
-
+    
+        storeData = ip+'#'+store_name+'#'+ps+'#'+pe+'#'+pc;
+        fs.writeFile('recover_'+store_name+'.txt', storeData, function(data){}); // Si no existe lo creo nuevo      
+    }
+} catch (error) { // Ocurre un error al leer el archivo
     pe = ps + 1;
     pc = pe + 1;
 
     storeData = ip+'#'+store_name+'#'+ps+'#'+pe+'#'+pc;
-    fs.writeFile('tienda'+store_name+'.txt', storeData, function(data){}); // Si no existe lo creo nuevo  
-
-    // Si es el primer nodo que se levanta, registro cual es su entry point
-/*     if(config.number_nodes === 0){
-        config.first_entry_point = pe;
-    }
-    config.number_nodes += 1;
-
-    if((config.number_nodes > 2) && lastNode){ // Si es mayor a 2 nodos, debo cerrar el anillo con el primero
-        ps = parseInt(config.first_entry_point, 10);
-    }   */
+    fs.writeFile('recover_'+store_name+'.txt', storeData, function(data){}); // Si no existe lo creo nuevo  
 }
-
-/* ((config.number_nodes > 2) && lastNode) ? app.set('port', config.last_port_initiated + 1) : app.set('port', ps);
-config.last_port_initiated = pc; // Actualizo el ultimo puerto de cliente creado por un nodo */
 
 app.set('port', ps);
 
@@ -97,7 +81,6 @@ socketInput.sockets.on('connection', function(socket){
 
         // Si la tienda donde se agrega el producto es igual a la data estoy en el nodo de la tienda
         if(last_message.split('#')[0] === store_name){
-            console.log("Llego aqui");
             socketClient.emit('add_product', 'Su producto ha sido agregado a la tienda ' + store_name+ ' exitosamente.');
         }
         else { // Sino emito la data a los demas nodos.
@@ -112,14 +95,6 @@ socketInput.sockets.on('connection', function(socket){
             }
             socketOut.emit('add_product', productList.toString());
         }
-    })
-
-    socket.on('add_store', function(data){
-       stores = data.split(',');
-
-       if(data.split(',')[stores.length-1] !== store_name){
-           socketOut.emit('add_store', stores.toString());
-       }
     })
 })
 //************************* SOCKET PARA ENTRADA DEL SERVIDOR *********************************//
@@ -206,8 +181,8 @@ socketClient.on('connection', function(socket){
         socketClient.emit('total_product_store', serializedString.substr(0, serializedString.length - 1));
     })
 
-    socket.on('totaltienda', function(data){
-        socketClient.emit('totaltienda', productList.toString());
+    socket.on('total_store', function(data){
+        socketClient.emit('total_store', productList.toString());
     })
 })
 //************************* SOCKET DE SALIDA PARA EL CLIENTE *********************************//
