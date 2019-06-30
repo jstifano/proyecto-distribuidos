@@ -38,6 +38,13 @@ try {
             pc = parseInt(content.split('#')[4], 10);
         })
     }
+    else {
+        pe = ps + 1;
+        pc = pe + 1;
+
+        storeData = ip+'#'+store_name+'#'+ps+'#'+pe+'#'+pc;
+        fs.writeFile('recover_'+store_name+'.txt', storeData, function(data){}); // Si no existe lo creo nuevo     
+    }
 
     // Hago recover del inventario de la tienda
     if(fs.exists('inventory_'+store_name+'.txt')){
