@@ -43,10 +43,19 @@ io.on('connect', function(socket){
     else if(message === 'totaltienda'){
         io.emit('total_store', message);
     }
+    else if(message = 'registrarcompra'){
+        io.emit('register_sell', message);    
+    }
 });
 
 // Respuesta del servidor al emitir la respuesta de añadir un producto a la tienda
 io.on('add_product', function(data){
+    console.log("Response server ::: ", data);
+    io.disconnect();
+})
+
+// Respuesta del servidor al emitir la respuesta de la compra del cliente
+io.on('register_sell', function(data){
     console.log("Response server ::: ", data);
     io.disconnect();
 })

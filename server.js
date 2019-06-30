@@ -8,7 +8,8 @@ var pe = null; // Puerto de entrada
 var pc = null; // Puerto del cliente
 var store_name = "";
 var storeData = "";
-var productList = []; //Lista de productos en inventario
+var productList = []; // Lista de productos en inventario
+var listSells = []; // Lista de compras
 var lastNode = false;
 var ip = "";
 var ipToConnect = "";
@@ -44,7 +45,8 @@ try {
         storeData = ip+'#'+store_name+'#'+ps+'#'+pe+'#'+pc;
         fs.writeFile('recover_'+store_name+'.txt', storeData, function(data){}); // Si no existe lo creo nuevo      
     }
-    //Hago recover del inventario de la tienda
+
+    // Hago recover del inventario de la tienda
     if(fs.exists('inventory_'+store_name+'.txt')){
         // El archivo existe, agarro los datos del archivo y leo la lista de productos
         fs.readFile('inventory_'+store_name+'.txt', 'utf8', function(err, content){
@@ -53,6 +55,17 @@ try {
     }
     else {
         fs.writeFile('inventory_'+store_name+'.txt', [], function(data){}); // Si no existe lo creo nuevo      
+    }
+
+    // Hago recover de las compras realizadas por los clientes
+    if(fs.exists('sells_'+store_name+'.txt')){
+        // El archivo existe, agarro los datos del archivo y leo la lista de las compras
+        fs.readFile('sells_'+store_name+'.txt', 'utf8', function(err, content){
+            productList = JSON.parse("[" + content + "]");
+        })
+    }
+    else {
+        fs.writeFile('sells_'+store_name+'.txt', [], function(data){}); // Si no existe lo creo nuevo      
     }
 } catch (error) { // Ocurre un error al leer el archivo
     pe = ps + 1;
@@ -63,13 +76,6 @@ try {
 }
 
 app.set('port', ps);
-
-/* fs.writeFile('config.json', JSON.stringify(config), function (err) {
-    if (err) {
-        console.log("Ocurrio un error actualizando el archivo config");
-    }
-    console.log("El puerto para el cliente en esta tienda es: ", pc);
-}) */
 
 var socketInput = require('socket.io').listen(pe); // Abro el socket de salida del servidor
 var socketClient = require('socket.io').listen(pc); // Abro el socket del cliente del servidor
@@ -106,6 +112,28 @@ socketInput.sockets.on('connection', function(socket){
                 socketOut = socketOut.connect('http://'+ipToConnect+':'+(ps + 4));
             }
             socketOut.emit('add_product', productList.toString()); 
+        }
+    })
+
+    socket.on('register_sell', function(data){
+        productList = JSON.parse(data.split('/')[0]);
+        listSells = JSON.parse(data.split('/')[1]);
+
+        fs.writeFile('inventory_'+store_name+'.txt', productList.toString(), function(data){});
+        fs.writeFile('sells_'+store_name+'.txt', listSells.toString(), function(data){});
+
+        if(data.split('/')[0] === store_name){
+            socketClient.emit('register_sell', 'Se registro la compra exitosamente.');    
+        }
+        else {
+            let socketOut = require('socket.io-client');// Abro el socket de salida del servidor
+            if(store_name === '3'){
+                socketOut = socketOut.connect('http://'+ipToConnect+':'+(pc - 7));
+            }
+            else {
+                socketOut = socketOut.connect('http://'+ipToConnect+':'+(ps + 4));
+            }
+            socketOut.emit('register_sell', data);
         }
     })
 })
@@ -196,6 +224,88 @@ socketClient.on('connection', function(socket){
 
     socket.on('total_store', function(data){
         socketClient.emit('total_store', productList.toString());
+    })
+
+    /**************************************************
+    * Metodo para registrar una compra en el servidor *
+    ***************************************************/
+    socket.on('register_sell', function(data){
+        let sumInventory = 0;
+        let message = data.split('#')[1] + '#' + data.split('#')[2] + '#' + data.split('#')[3] + '#' + data.split('#')[4] + '#' + data.split('#')[5];
+        let isInOtherStore = false;
+
+        // Ciclo para obtener la sumatoria de productos en inventario
+        productList.forEach(p => {
+            if(p.split('#')[1] === data.split('#')[4]){
+                sumInventory += parseInt(p.split('#')[2], 10);
+            }
+        })
+
+        // No hay productos en inventario
+        if(sumInventory === 0){
+            socketClient.emit('register_sell', 'No hay productos con el código '+ data.split('#')[4] + 'en inventario.');       
+        }
+        else {
+            let newList = [];
+            productList.forEach(p => {
+                if(!isInOtherStore){
+                    if(p.split('#')[0] === data.split('#')[3] && p.split('#')[1] === data.split('#')[4]){
+                        // No hay productos del cual puedo comprar en la tienda, voy a inventario
+                        if(parseInt(p.split('#')[2], 10) < parseInt(data.split('#')[5], 10) ){ 
+                            isInOtherStore = true; // Debo restar el inventario en otra tienda    
+                        }
+                        else { // Hay productos en la tienda, puedo comprar y registrarla
+                            listSells.push(message);
+                            console.log("Se registro la compra.");
+                            fs.writeFile('sells_'+store_name+'.txt', listSells.toString(), function(data){});
+                            // Resto el inventario de la tienda
+                            p = p.split('#')[0] + '#' + p.split('#')[1] + '#' + ( parseInt(p.split('#')[2], 10) - parseInt(data.split('#')[5], 10) );      
+                        }    
+                    }
+                }
+                newList.push(p);
+            })
+
+            if(isInOtherStore){
+                let otherList = [];
+                productList.forEach(p => {
+                    if(p.split('#')[0] !== data.split('#')[3] && p.split('#')[1] === data.split('#')[4]){
+                        // Hay productos en la nueva tienda
+                        if(parseInt(p.split('#')[2], 10) > 0 ){ 
+                            listSells.push(message);
+                            console.log("Se registro la compra.");
+                            fs.writeFile('sells_'+store_name+'.txt', listSells.toString(), function(data){});
+                            // Resto el inventario de la tienda
+                            p = p.split('#')[0] + '#' + p.split('#')[1] + '#' + ( parseInt(p.split('#')[2], 10) - parseInt(data.split('#')[5], 10) );    
+                        } 
+                    } 
+                    otherList.push(p);
+                })
+
+                productList = otherList;
+                fs.writeFile('inventory_'+store_name+'.txt', productList.toString(), function(data){});
+                let socketOut = require('socket.io-client');// Abro el socket de salida del servidor
+                if(store_name === '3'){
+                    socketOut = socketOut.connect('http://'+ipToConnect+':'+(pc - 7));
+                }
+                else {
+                    socketOut = socketOut.connect('http://'+ipToConnect+':'+(ps + 4));
+                }
+                socketOut.emit('register_sell', data.split('#')[3]+'/'+productList.toString()+'/'+listSells.toString());    
+            }
+            else {
+                productList = newList;
+                fs.writeFile('inventory_'+store_name+'.txt', productList.toString(), function(data){});
+                let socketOut = require('socket.io-client');// Abro el socket de salida del servidor
+                if(store_name === '3'){
+                    socketOut = socketOut.connect('http://'+ipToConnect+':'+(pc - 7));
+                }
+                else {
+                    socketOut = socketOut.connect('http://'+ipToConnect+':'+(ps + 4));
+                }
+                socketOut.emit('register_sell', data.split('#')[3]+'/'+productList.toString()+'/'+listSells.toString());
+            }  
+        }
     })
 })
 //************************* SOCKET DE SALIDA PARA EL CLIENTE *********************************//
