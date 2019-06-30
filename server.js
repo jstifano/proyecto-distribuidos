@@ -118,9 +118,11 @@ socketInput.sockets.on('connection', function(socket){
     })
 
     socket.on('register_sell', function(data){
-        productList = JSON.parse(data.split('/')[0]);
-        listSells = JSON.parse(data.split('/')[1]);
-
+        productList = data.split('/')[0];
+        listSells = data.split('/')[1];
+        console.log("Product list >>> ", productList);
+        console.log("List sells >>> ", listSells);
+        
         fs.writeFile('inventory_'+store_name+'.txt', productList.toString(), function(data){});
         fs.writeFile('sells_'+store_name+'.txt', listSells.toString(), function(data){});
 
