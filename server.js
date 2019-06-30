@@ -31,7 +31,6 @@ try {
     if(fs.exists('recover_'+store_name+'.txt')){
         // El archivo existe, agarro los datos del archivo y recupero los puertos en el cual estaba levantado
         fs.readFile('recover_'+store_name+'.txt', 'utf8', function(err, content){
-            console.log("contenttt", content);
             store_name = content.split('#')[1];
             ps = parseInt(content.split('#')[2], 10);
             pe = parseInt(content.split('#')[3], 10);
@@ -44,6 +43,16 @@ try {
     
         storeData = ip+'#'+store_name+'#'+ps+'#'+pe+'#'+pc;
         fs.writeFile('recover_'+store_name+'.txt', storeData, function(data){}); // Si no existe lo creo nuevo      
+    }
+    //Hago recover del inventario de la tienda
+    if(fs.exists('inventory_'+store_name+'.txt')){
+        // El archivo existe, agarro los datos del archivo y leo la lista de productos
+        fs.readFile('inventory_'+store_name+'.txt', 'utf8', function(err, content){
+            productList = JSON.parse("[" + content + "]");
+        })
+    }
+    else {
+        fs.writeFile('inventory_'+store_name+'.txt', [], function(data){}); // Si no existe lo creo nuevo      
     }
 } catch (error) { // Ocurre un error al leer el archivo
     pe = ps + 1;
@@ -87,6 +96,8 @@ socketInput.sockets.on('connection', function(socket){
         else { // Sino emito la data a los demas nodos.
             productList = data.split(',');
             console.log("Se actualizo la lista ", productList);
+
+            fs.writeFile('inventory_'+store_name+'.txt', productList.toString(), function(data){});
             let socketOut = require('socket.io-client');// Abro el socket de salida del servidor
             if(store_name === '3'){
                 socketOut = socketOut.connect('http://'+ipToConnect+':'+(pc - 7));
@@ -94,7 +105,7 @@ socketInput.sockets.on('connection', function(socket){
             else {
                 socketOut = socketOut.connect('http://'+ipToConnect+':'+(ps + 4));
             }
-            socketOut.emit('add_product', productList.toString());
+            socketOut.emit('add_product', productList.toString()); 
         }
     })
 })
@@ -140,6 +151,7 @@ socketClient.on('connection', function(socket){
             console.log("Se agrego un producto");
         }
 
+        fs.writeFile('inventory_'+store_name+'.txt', productList.toString(), function(data){}); 
         let socketOut = require('socket.io-client');// Abro el socket de salida del servidor
         if(store_name === '3'){
             socketOut = socketOut.connect('http://'+ipToConnect+':'+(pc - 7));
@@ -177,7 +189,7 @@ socketClient.on('connection', function(socket){
         });
         let serializedString = ""; 
         for (var [clave, valor] of new_map.entries()) {
-            serializedString = serializedString+clave+'#'+valor+','
+            serializedString = serializedString+clave+'#'+valor+',';
         }
         socketClient.emit('total_product_store', serializedString.substr(0, serializedString.length - 1));
     })
