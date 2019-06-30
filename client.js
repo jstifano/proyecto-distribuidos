@@ -43,7 +43,7 @@ io.on('connect', function(socket){
     else if(message === 'totaltienda'){
         io.emit('total_store', message);
     }
-    else if(message = 'registrarcompra'){
+    else if(message === 'registrarcompra'){
         io.emit('register_sell', message);    
     }
 });

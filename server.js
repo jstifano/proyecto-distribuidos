@@ -38,13 +38,6 @@ try {
             pc = parseInt(content.split('#')[4], 10);
         })
     }
-    else {
-        pe = ps + 1; 
-        pc = pe + 1;
-    
-        storeData = ip+'#'+store_name+'#'+ps+'#'+pe+'#'+pc;
-        fs.writeFile('recover_'+store_name+'.txt', storeData, function(data){}); // Si no existe lo creo nuevo      
-    }
 
     // Hago recover del inventario de la tienda
     if(fs.exists('inventory_'+store_name+'.txt')){
@@ -53,26 +46,22 @@ try {
             productList = JSON.parse("[" + content + "]");
         })
     }
-    else {
-        fs.writeFile('inventory_'+store_name+'.txt', [], function(data){}); // Si no existe lo creo nuevo      
-    }
 
     // Hago recover de las compras realizadas por los clientes
     if(fs.exists('sells_'+store_name+'.txt')){
         // El archivo existe, agarro los datos del archivo y leo la lista de las compras
         fs.readFile('sells_'+store_name+'.txt', 'utf8', function(err, content){
-            productList = JSON.parse("[" + content + "]");
+            listSells = JSON.parse("[" + content + "]");
         })
-    }
-    else {
-        fs.writeFile('sells_'+store_name+'.txt', [], function(data){}); // Si no existe lo creo nuevo      
     }
 } catch (error) { // Ocurre un error al leer el archivo
     pe = ps + 1;
     pc = pe + 1;
 
     storeData = ip+'#'+store_name+'#'+ps+'#'+pe+'#'+pc;
-    fs.writeFile('recover_'+store_name+'.txt', storeData, function(data){}); // Si no existe lo creo nuevo  
+    fs.writeFile('recover_'+store_name+'.txt', storeData, function(data){}); // Si no existe lo creo nuevo 
+    fs.writeFile('inventory_'+store_name+'.txt', "", function(data){});
+    fs.writeFile('sells_'+store_name+'.txt', "", function(data){});    
 }
 
 app.set('port', ps);
