@@ -119,7 +119,13 @@ function createTable(data, type){
         }  
     }
     else if(type === 'total'){
-        if(data.split(',').length === 1){
+        if(!data){
+            rows = [['No hay productos', 0]];
+            pt.create(headers, rows);
+            pt.print(); // Pinto la tabla vacia ya que no hay productos en la tienda
+            rows = [];
+        }
+        else if(data.split(',').length === 1){
             let code = data.split('#')[0];
             let quantity = data.split('#')[1];
             let elements = [];
@@ -130,7 +136,7 @@ function createTable(data, type){
             pt.create(headers, rows);
             pt.print(); // Pinto la tabla con el resultado del inventario de la empresa
         }
-        else {
+        else if(data.split(',').length > 1){
             let arrayOfProducts = data.split(',');
 
             arrayOfProducts.forEach(product =>  {
