@@ -43,7 +43,7 @@ io.on('connect', function(socket){
     else if(message === 'totaltienda'){
         io.emit('total_store', message);
     }
-    else if(message === 'registrarcompra'){
+    else if(message.split('#')[0] === 'registrarcompra'){
         io.emit('register_sell', message);    
     }
 });
@@ -118,7 +118,7 @@ function createTable(data, type){
             } 
         }  
     }
-    else if(message === 'total'){
+    else if(type === 'total'){
         if(data.split(',').length === 1){
             let code = data.split('#')[0];
             let quantity = data.split('#')[1];

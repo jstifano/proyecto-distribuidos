@@ -224,6 +224,7 @@ socketClient.on('connection', function(socket){
         socketClient.emit('total_product_store', serializedString.substr(0, serializedString.length - 1));
     })
 
+    // Listar todos los productos de la empresa
     socket.on('total_store', function(data){
         socketClient.emit('total_store', productList.toString());
     })
