@@ -29,14 +29,13 @@ process.argv.forEach(function(val, index, array){
 
 // Proceso de recuperación del nodo en caso de una falla
 try {
-    if(fs.exists('recover_'+store_name+'.txt')){
+    if(fs.existsSync('./recover_'+store_name+'.txt')){
         // El archivo existe, agarro los datos del archivo y recupero los puertos en el cual estaba levantado
-        fs.readFile('recover_'+store_name+'.txt', 'utf8', function(err, content){
-            store_name = content.split('#')[1];
-            ps = parseInt(content.split('#')[2], 10);
-            pe = parseInt(content.split('#')[3], 10);
-            pc = parseInt(content.split('#')[4], 10);
-        })
+        var content = fs.readFileSync('recover_'+store_name+'.txt');
+        store_name = content.toString().split('#')[1];
+        ps = parseInt(content.toString().split('#')[2], 10);
+        pe = parseInt(content.toString().split('#')[3], 10);
+        pc = parseInt(content.toString().split('#')[4], 10);
     }
     else {
         pe = ps + 1;
@@ -47,21 +46,28 @@ try {
     }
 
     // Hago recover del inventario de la tienda
-    if(fs.exists('inventory_'+store_name+'.txt')){
+    if(fs.existsSync('./inventory_'+store_name+'.txt')){
         // El archivo existe, agarro los datos del archivo y leo la lista de productos
         fs.readFile('inventory_'+store_name+'.txt', 'utf8', function(err, content){
-            productList = JSON.parse("[" + content + "]");
+            productList = content.split(',');
         })
+    }
+    else {
+        fs.writeFile('inventory_'+store_name+'.txt', "", function(data){});
     }
 
     // Hago recover de las compras realizadas por los clientes
-    if(fs.exists('sells_'+store_name+'.txt')){
+    if(fs.existsSync('./sells_'+store_name+'.txt')){
         // El archivo existe, agarro los datos del archivo y leo la lista de las compras
         fs.readFile('sells_'+store_name+'.txt', 'utf8', function(err, content){
-            listSells = JSON.parse("[" + content + "]");
+            listSells = content.split(',');
         })
     }
+    else {
+        fs.writeFile('sells_'+store_name+'.txt', "", function(data){});   
+    }
 } catch (error) { // Ocurre un error al leer el archivo
+    console.log("Entro aqui", error);
     pe = ps + 1;
     pc = pe + 1;
 
@@ -162,7 +168,7 @@ socketClient.on('connection', function(socket){
 
             if(!isFound){ // El producto que se está añadiendo, no está en la lista de inventario de la tienda
                 console.log("Se agrego un producto");
-                productList.push(message);
+                productList.push(message.toString());
             }
             else { // Actualizo el inventario de la tienda
                 productList = new_list;
@@ -171,7 +177,7 @@ socketClient.on('connection', function(socket){
             }
         }
         else { // Es el primer producto que se agrega a inventario
-            productList.push(message);
+            productList.push(message.toString());
             console.log("Se agrego un producto");
         }
 
