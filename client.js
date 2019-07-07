@@ -8,6 +8,7 @@ var message = "";
 var PrettyTable = require('prettytable');
 var pt = new PrettyTable();
 var headers = ['Productos', 'Cantidad'];
+var headersGetCompra = ['Cod. Cliente', 'Cliente', 'Cod. Producto', 'Cantidad total']
 var rows = [];
 
 // Funcion para recibir los argumentos enviados al levantar un node de servidor
@@ -46,6 +47,9 @@ io.on('connect', function(socket){
     else if(message.split('#')[0] === 'registrarcompra'){
         io.emit('register_sell', message);    
     }
+    else if(message === 'listarcompras'){
+        io.emit('get_sells', message);     
+    }
 });
 
 // Respuesta del servidor al emitir la respuesta de añadir un producto a la tienda
@@ -74,6 +78,11 @@ io.on('list_product_store', function(data){
 
 io.on('total_store', function(data){
     createTable(data, 'totaltienda');
+    io.disconnect();
+})
+
+io.on('get_sells', function(data){
+    createTable(data, 'listarcompras');
     io.disconnect();
 })
 
@@ -154,6 +163,48 @@ function createTable(data, type){
             pt.create(headers, rows);
             pt.print(); // Pinto la tabla con el resultado del inventario de la empresa
         }
+    }
+    else if(type === 'listarcompras'){
+        if(!data){
+            console.log("No hay compras realizadas.");
+        }
+        else if(data.split(',').length === 1){
+            let cod_client = data.split('#')[0];
+            let client = data.split('#')[1];
+            let product = data.split('#')[2];
+            let quantity = data.split('#')[3];
+            let elements = [];
+            elements.push(cod_client);
+            elements.push(client);
+            elements.push(product);
+            elements.push(quantity);
+            rows.push(elements);
+
+            pt.create(headersGetCompra, rows);
+            pt.print(); // Pinto la tabla con el resultado del inventario de la empresa    
+        }  
+        else if(data.split(',').length > 1) {
+            let arrayOfSells = data.split(',');
+
+            arrayOfSells.forEach(p =>  {
+                let cod_client = p.split('#')[0];
+                let client = p.split('#')[1];
+                let product = p.split('#')[2];
+                let quantity = p.split('#')[3];
+                let elements = [];
+                elements.push(cod_client);
+                elements.push(client);
+                elements.push(product);
+                elements.push(quantity);
+                rows.push(elements);
+                code = "";
+                quantity = "";
+                elements = [];
+            })
+
+            pt.create(headersGetCompra, rows);
+            pt.print(); // Pinto la tabla con el resultado del inventario de la empresa    
+        } 
     }
     else {
         console.log("Dataaa", data);

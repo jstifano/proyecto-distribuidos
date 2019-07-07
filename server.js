@@ -67,7 +67,6 @@ try {
         fs.writeFile('sells_'+store_name+'.txt', "", function(data){});   
     }
 } catch (error) { // Ocurre un error al leer el archivo
-    console.log("Entro aqui", error);
     pe = ps + 1;
     pc = pe + 1;
 
@@ -115,7 +114,7 @@ socketInput.sockets.on('connection', function(socket){
             }
             socketOut.emit('add_product', productList.toString()); 
         }
-    })
+    });
 
     socket.on('register_sell', function(data){
         productList = data.split('/')[1].split(',');
@@ -222,7 +221,7 @@ socketClient.on('connection', function(socket){
             serializedString = serializedString+clave+'#'+valor+',';
         }
         socketClient.emit('total_product_store', serializedString.substr(0, serializedString.length - 1));
-    })
+    });
 
     // Listar todos los productos de la empresa
     socket.on('total_store', function(data){
@@ -235,70 +234,50 @@ socketClient.on('connection', function(socket){
     socket.on('register_sell', function(data){
         let sumInventory = 0;
         let message = data.split('#')[1] + '#' + data.split('#')[2] + '#' + data.split('#')[3] + '#' + data.split('#')[4] + '#' + data.split('#')[5];
-        let isInOtherStore = false;
-
+        let existsProduct = false;
+        
         // Ciclo para obtener la sumatoria de productos en inventario
         productList.forEach(p => {
-            if(p.split('#')[1] === data.split('#')[4]){
+            if(p.split('#')[0] === data.split('#')[3] && p.split('#')[1] === data.split('#')[4]){
                 sumInventory += parseInt(p.split('#')[2], 10);
+                existsProduct = true;
             }
         })
 
+        if(!existsProduct){
+            socketClient.emit('register_sell', 'El código de producto que desea comprar no existe');        
+        }
+
         // No hay productos en inventario
         if(sumInventory === 0){
-            socketClient.emit('register_sell', 'No hay productos con el código '+ data.split('#')[4] + 'en inventario.');       
+            socketClient.emit('register_sell', 'No hay productos con el código ' + data.split('#')[4] + ' para comprar en inventario.');       
         }
         else {
             let newList = [];
+
             productList.forEach(p => {
-                if(!isInOtherStore){
-                    if(p.split('#')[0] === data.split('#')[3] && p.split('#')[1] === data.split('#')[4]){
-                        // No hay productos del cual puedo comprar en la tienda, voy a inventario
-                        if(parseInt(p.split('#')[2], 10) < parseInt(data.split('#')[5], 10) ){ 
-                            isInOtherStore = true; // Debo restar el inventario en otra tienda    
-                        }
-                        else { // Hay productos en la tienda, puedo comprar y registrarla
-                            listSells.push(message);
-                            console.log("Se registro la compra.");
-                            fs.writeFile('sells_'+store_name+'.txt', listSells.toString(), function(data){});
-                            // Resto el inventario de la tienda
-                            p = p.split('#')[0] + '#' + p.split('#')[1] + '#' + ( parseInt(p.split('#')[2], 10) - parseInt(data.split('#')[5], 10) );      
-                        }    
+                if(p.split('#')[0] === data.split('#')[3] && p.split('#')[1] === data.split('#')[4]){
+                    existsProduct = true; // Existe el producto que va comprar
+
+                    // No hay productos del cual puedo comprar en la tienda, voy a inventario
+                    if(parseInt(p.split('#')[2], 10) < parseInt(data.split('#')[5], 10) ){ 
+                        socketClient.emit('register_sell', 'No hay productos con el código ' + data.split('#')[4] + ' para comprar en inventario.');      
                     }
+                    else { // Hay productos en la tienda, puedo comprar y registrarla
+                        listSells.push(message);
+                        console.log("Se registro la compra.");
+                        fs.writeFile('sells_'+store_name+'.txt', listSells.toString(), function(data){});
+                        // Resto el inventario de la tienda
+                        p = p.split('#')[0] + '#' + p.split('#')[1] + '#' + ( parseInt(p.split('#')[2], 10) - parseInt(data.split('#')[5], 10) );      
+                    }    
                 }
                 newList.push(p);
-            })
+            });
+            
+            productList = newList;
+            fs.writeFile('inventory_'+store_name+'.txt', productList.toString(), function(data){});
 
-            if(isInOtherStore){
-                let otherList = [];
-                productList.forEach(p => {
-                    if(p.split('#')[0] !== data.split('#')[3] && p.split('#')[1] === data.split('#')[4]){
-                        // Hay productos en la nueva tienda
-                        if(parseInt(p.split('#')[2], 10) > 0 ){ 
-                            listSells.push(message);
-                            console.log("Se registro la compra.");
-                            fs.writeFile('sells_'+store_name+'.txt', listSells.toString(), function(data){});
-                            // Resto el inventario de la tienda
-                            p = p.split('#')[0] + '#' + p.split('#')[1] + '#' + ( parseInt(p.split('#')[2], 10) - parseInt(data.split('#')[5], 10) );    
-                        } 
-                    } 
-                    otherList.push(p);
-                })
-
-                productList = otherList;
-                fs.writeFile('inventory_'+store_name+'.txt', productList.toString(), function(data){});
-                let socketOut = require('socket.io-client');// Abro el socket de salida del servidor
-                if(store_name === '3'){
-                    socketOut = socketOut.connect('http://'+ipToConnect+':'+(pc - 7));
-                }
-                else {
-                    socketOut = socketOut.connect('http://'+ipToConnect+':'+(ps + 4));
-                }
-                socketOut.emit('register_sell', data.split('#')[3]+'/'+productList.toString()+'/'+listSells.toString());    
-            }
-            else {
-                productList = newList;
-                fs.writeFile('inventory_'+store_name+'.txt', productList.toString(), function(data){});
+            if(existsProduct){
                 let socketOut = require('socket.io-client');// Abro el socket de salida del servidor
                 if(store_name === '3'){
                     socketOut = socketOut.connect('http://'+ipToConnect+':'+(pc - 7));
@@ -307,8 +286,30 @@ socketClient.on('connection', function(socket){
                     socketOut = socketOut.connect('http://'+ipToConnect+':'+(ps + 4));
                 }
                 socketOut.emit('register_sell', data.split('#')[3]+'/'+productList.toString()+'/'+listSells.toString());
-            }  
+            }
+            else {
+                socketClient.emit('register_sell', 'El código de producto que desea comprar no existe');    
+            }
         }
+    })
+
+    socket.on('get_sells', function(data){
+        var new_map = new Map();
+        listSells.forEach(sell => {
+            let split = sell.split('#');
+            if(!new_map.get(split[0]+'#'+split[1]+'#'+split[3]) ){
+                new_map.set(split[0]+'#'+split[1]+'#'+split[3],split[4]);
+            }else{
+                let cantidad = new_map.get(split[0]+'#'+split[1]+'#'+split[3]);
+                let updatedCantidad = parseInt(cantidad,10)+parseInt(split[4]);
+                new_map.set(split[0]+'#'+split[1]+'#'+split[3],updatedCantidad.toString());
+            }
+        });
+        let serializedString = ""; 
+        for (var [clave, valor] of new_map.entries()) {
+            serializedString = serializedString+clave+'#'+valor+',';
+        }
+        socketClient.emit('get_sells', serializedString.substr(0, serializedString.length - 1));
     })
 })
 //************************* SOCKET DE SALIDA PARA EL CLIENTE *********************************//
